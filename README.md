@@ -49,6 +49,37 @@ python app.py
 
 Then open http://localhost:8000 in your browser. The Python server exposes the API under `/api/*` and serves the front-end from the `/client` folder.
 
+## Containerised / production deployment
+
+You can deploy the workspace as a single container without installing Python on the host.
+
+### Build and run with Docker
+
+```bash
+# build the image (run from repo root)
+docker build -t invoiceai .
+
+# create a .env file with your secrets
+cp server/.env.example server/.env
+vim server/.env  # or edit with your preferred editor
+
+# start the container and expose port 8000
+docker run --env-file server/.env -p 8000:8000 invoiceai
+```
+
+### Use docker-compose for persistent data
+
+The bundled `docker-compose.yml` keeps the JSON database on the host (`./server/data`) so restarts do not wipe invoices. It also automatically loads environment variables from `server/.env`.
+
+```bash
+cp server/.env.example server/.env
+vim server/.env
+
+docker compose up --build
+```
+
+When running in production, point your reverse proxy at the host + port exposed by Docker (default `8000`). The process inside the container still serves both the API and the static client.
+
 ## Key API routes
 
 | Method | Path | Purpose |
