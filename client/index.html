@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InvoiceAI Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo-pill">IA</div>
+          <div>
+            <h1>InvoiceAI</h1>
+            <p>Create invoices, take payments, and keep cashflow on track.</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="refreshButton" class="ghost">Refresh data</button>
+          <span class="status-pill" id="apiStatus">API: --</span>
+        </div>
+      </header>
+      <div class="workspace">
+        <aside class="side-nav">
+          <button class="nav-item active" data-section="dashboard">Dashboard</button>
+          <button class="nav-item" data-section="customers">Customers</button>
+          <button class="nav-item" data-section="products">Products</button>
+          <button class="nav-item" data-section="invoices">Invoices</button>
+          <button class="nav-item" data-section="payments">Payments</button>
+          <button class="nav-item" data-section="settings">Settings</button>
+        </aside>
+        <main>
+          <section id="dashboardPanel" class="panel active">
+            <div class="grid two">
+              <article class="card" id="dashboardCard">
+                <div class="card-header">
+                  <div>
+                    <h2>Cashflow pulse</h2>
+                    <p>Live payments and product movement.</p>
+                  </div>
+                </div>
+                <div id="dashboardContent">
+                  <div class="chart" id="paymentsChart"></div>
+                  <div class="top-products" id="topProducts"></div>
+                </div>
+              </article>
+              <article class="card" id="snapshotCard">
+                <div class="card-header">
+                  <div>
+                    <h2>Snapshot</h2>
+                    <p>Quick stats for the month.</p>
+                  </div>
+                </div>
+                <ul class="snapshot" id="snapshotStats">
+                  <li><strong id="totalInvoices">0</strong><span>Invoices</span></li>
+                  <li><strong id="totalCustomers">0</strong><span>Customers</span></li>
+                  <li><strong id="totalProducts">0</strong><span>Products</span></li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section id="customersPanel" class="panel">
+            <article class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Customers</h2>
+                  <p>Add, edit, and review your customer directory.</p>
+                </div>
+                <button id="cancelCustomerEdit" class="ghost" type="button">Cancel edit</button>
+              </div>
+              <form id="customerForm" class="stack">
+                <input type="hidden" name="customerId" />
+                <div class="grid two gap">
+                  <label>
+                    <span>Contact name</span>
+                    <input type="text" name="name" required />
+                  </label>
+                  <label>
+                    <span>Company</span>
+                    <input type="text" name="company" />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input type="email" name="email" required />
+                  </label>
+                  <label>
+                    <span>Phone</span>
+                    <input type="tel" name="phone" />
+                  </label>
+                </div>
+                <button type="submit">Save customer</button>
+              </form>
+              <div class="list" id="customersList"></div>
+            </article>
+          </section>
+
+          <section id="productsPanel" class="panel">
+            <article class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Products</h2>
+                  <p>Maintain SKUs, pricing, and stock info.</p>
+                </div>
+                <button id="cancelProductEdit" class="ghost" type="button">Cancel edit</button>
+              </div>
+              <form id="productForm" class="stack">
+                <input type="hidden" name="productId" />
+                <div class="grid two gap">
+                  <label>
+                    <span>Name</span>
+                    <input type="text" name="name" required />
+                  </label>
+                  <label>
+                    <span>SKU</span>
+                    <input type="text" name="sku" />
+                  </label>
+                  <label>
+                    <span>Barcode</span>
+                    <input type="text" name="barcode" />
+                  </label>
+                  <label>
+                    <span>RRP</span>
+                    <input type="number" step="0.01" name="rrp" />
+                  </label>
+                  <label>
+                    <span>Cost</span>
+                    <input type="number" step="0.01" name="cost" required />
+                  </label>
+                </div>
+                <button type="submit">Save product</button>
+              </form>
+              <div class="list" id="productsList"></div>
+            </article>
+          </section>
+
+          <section id="invoicesPanel" class="panel">
+            <article class="card" id="invoiceBuilder">
+              <div class="card-header">
+                <div>
+                  <h2>Invoices</h2>
+                  <p>Create or update invoices and track fulfilment.</p>
+                </div>
+                <div class="builder-actions">
+                  <button id="addRowButton" class="ghost" type="button">Add line</button>
+                  <button id="cancelInvoiceEdit" class="ghost" type="button">Cancel edit</button>
+                </div>
+              </div>
+              <form id="invoiceForm" class="stack">
+                <input type="hidden" name="invoiceId" />
+                <div class="grid two gap">
+                  <label>
+                    <span>Customer</span>
+                    <select name="customerId" id="invoiceCustomer" required></select>
+                  </label>
+                  <label>
+                    <span>Payment terms</span>
+                    <input type="text" name="paymentTerms" />
+                  </label>
+                  <label>
+                    <span>Due date</span>
+                    <input type="date" name="dueDate" />
+                  </label>
+                  <label>
+                    <span>Notes</span>
+                    <input type="text" name="notes" placeholder="Optional memo" />
+                  </label>
+                </div>
+                <div class="item-table">
+                  <div class="item-row item-head">
+                    <span>Product</span>
+                    <span>Barcode</span>
+                    <span>SKU</span>
+                    <span>Qty</span>
+                    <span>RRP</span>
+                    <span>Discount %</span>
+                    <span>Cost</span>
+                    <span>Total</span>
+                    <span></span>
+                  </div>
+                  <div id="invoiceItems"></div>
+                </div>
+                <div class="totals" id="invoiceTotals"></div>
+                <button type="submit">Save invoice</button>
+              </form>
+              <div id="invoicesList" class="list"></div>
+            </article>
+          </section>
+
+          <section id="paymentsPanel" class="panel">
+            <article class="card">
+              <div class="card-header">
+                <div>
+                  <h2>Payments</h2>
+                  <p>Record offline payments or edit entries.</p>
+                </div>
+                <button id="cancelPaymentEdit" class="ghost" type="button">Cancel edit</button>
+              </div>
+              <form id="paymentForm" class="stack">
+                <input type="hidden" name="paymentId" />
+                <label>
+                  <span>Invoice</span>
+                  <select name="invoiceId" id="paymentInvoice" required></select>
+                </label>
+                <div class="grid two gap">
+                  <label>
+                    <span>Amount</span>
+                    <input type="number" step="0.01" name="amount" required />
+                  </label>
+                  <label>
+                    <span>Method</span>
+                    <input type="text" name="method" placeholder="bank transfer" />
+                  </label>
+                  <label>
+                    <span>Date</span>
+                    <input type="date" name="date" />
+                  </label>
+                  <label>
+                    <span>Notes</span>
+                    <input type="text" name="notes" />
+                  </label>
+                </div>
+                <button type="submit">Save payment</button>
+              </form>
+              <div class="list" id="paymentsList"></div>
+            </article>
+          </section>
+
+          <section id="settingsPanel" class="panel">
+            <article class="card" id="settingsCard">
+              <div class="card-header">
+                <div>
+                  <h2>Branding & Payment Terms</h2>
+                  <p>Keep your customer-facing experience on-brand.</p>
+                </div>
+              </div>
+              <form id="settingsForm" class="stack">
+                <label>
+                  <span>Company name</span>
+                  <input type="text" name="companyName" placeholder="e.g. Modern Studio" required />
+                </label>
+                <label>
+                  <span>Logo URL</span>
+                  <input type="url" name="logoUrl" placeholder="https://" />
+                </label>
+                <label>
+                  <span>Default payment terms</span>
+                  <input type="text" name="defaultPaymentTerms" placeholder="Net 15" />
+                </label>
+                <label>
+                  <span>Currency (ISO)</span>
+                  <input type="text" name="currency" maxlength="3" placeholder="usd" />
+                </label>
+                <button type="submit">Save settings</button>
+              </form>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

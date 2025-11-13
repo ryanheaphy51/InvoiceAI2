@@ -1,0 +1,12 @@
+{
+  "customers": [],
+  "products": [],
+  "invoices": [],
+  "payments": [],
+  "settings": {
+    "companyName": "",
+    "logoUrl": "",
+    "defaultPaymentTerms": "Due on receipt",
+    "currency": "usd"
+  }
+}
